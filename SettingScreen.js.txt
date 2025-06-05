@@ -1,0 +1,148 @@
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  Switch,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+
+const SettingsScreen = ({navigation}) => {
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Handle notification toggle
+  const toggleNotifications = () => setIsNotificationsEnabled(previousState => !previousState);
+
+  // Handle dark mode toggle
+  const toggleDarkMode = () => setIsDarkMode(previousState => !previousState);
+
+
+  // Save settings
+  const handleSaveSettings = () => {
+    Alert.alert('Settings Saved', 'Your settings have been updated!');
+    // In a real app, you would save this data to a backend or local storage.
+  };
+
+  return (
+    <View
+      style={[styles.container,isDarkMode ? styles.darkMode : styles.lightMode]}>
+      <Text
+        style={[styles.header,isDarkMode ? styles.darkText : styles.lightText ]}>
+        Settings
+      </Text>
+
+      {/* Notification Toggle Section */}
+      <View
+        style={[styles.settingRow,isDarkMode ? styles.darkBackground : styles.lightBackground,
+        ]}>
+        <Text
+          style={[styles.settingLabel,isDarkMode ? styles.darkText : styles.lightText,
+          ]}>
+          Enable Notifications
+        </Text>
+        <Switch
+          value={isNotificationsEnabled}
+          onValueChange={toggleNotifications}
+          trackColor={{false: '#767577', true: 'green'}} // Track color for both OFF and ON
+          thumbColor={isNotificationsEnabled ? '#f4f3f4' : '#f4f3f4'} // Thumb color for ON and OFF states
+        />
+      </View>
+
+      {/* Dark Mode Toggle Section */}
+      <View
+        style={[
+          styles.settingRow,
+          isDarkMode ? styles.darkBackground : styles.lightBackground,
+        ]}>
+        <Text
+          style={[
+            styles.settingLabel,
+            isDarkMode ? styles.darkText : styles.lightText,
+          ]}>
+          Dark Mode
+        </Text>
+        <Switch
+          value={isDarkMode}
+          onValueChange={toggleDarkMode}
+          trackColor={{false: '#767577', true: '#81b0ff'}} // Track color for both OFF and ON
+          thumbColor={isDarkMode ? '#f4f3f4' : '#f4f3f4'} // Thumb color for ON and OFF states
+        />
+      </View>
+
+      {/* Save Settings Button */}
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveSettings}>
+        <Text style={styles.saveButtonText}>Save Settings</Text>
+      </TouchableOpacity>
+
+      {/* Go Back Button */}
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.goBackButton}>
+        <Text style={styles.goBackText}>Go Back</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  darkMode: {
+    backgroundColor: '#333',
+  },
+  lightMode: {
+    backgroundColor: '#FFF',
+  },
+  darkText: {
+    color: '#FFF',
+  }, // Dark mode text color
+  lightText: {
+    color: '#333',
+  }, // Light mode text color
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 20,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: 'white',
+  },
+  darkBackground: {
+    backgroundColor: '#555',
+  }, // Dark mode background color for each section
+  lightBackground: {
+    backgroundColor: '#F0F0F0',
+  }, // Light mode background color for each section
+  settingLabel: {
+    fontSize: 18,
+  },
+  saveButton: {
+    backgroundColor: '#FF6347',
+    padding: 15,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  goBackButton: {marginTop: 20},
+  goBackText: {color: '#FF6347', fontSize: 16, fontWeight: 'bold'},
+});
+
+export default SettingsScreen;

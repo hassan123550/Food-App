@@ -1,0 +1,312 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const OrderStatusScreen = ({ route, navigation }) => {
+  const [progress, setProgress] = useState(0.2); // Order progress from 0 to 1
+
+  // Sample order data
+  const order = {
+    id: 'ORD-1234',
+    status: 'preparing', // confirmed, preparing, on_the_way, delivered
+    estimatedDelivery: '7:30 PM',
+    restaurant: {
+      name: 'Burger Haven',
+      image: 'https://example.com/restaurant.jpg',
+      phone: '+1 (555) 123-4567',
+    },
+    delivery: {
+      address: '123 Main St, Apt 4B, New York, NY 10001',
+      driverName: 'Michael',
+      driverPhone: '+1 (555) 987-6543',
+      driverPhoto: 'https://example.com/driver.jpg',
+    },
+    items: [
+      { name: 'Double Cheeseburger', quantity: 2, price: 12.99 },
+      { name: 'French Fries', quantity: 1, price: 4.99 },
+      { name: 'Chocolate Shake', quantity: 1, price: 5.99 },
+    ],
+    paymentMethod: 'Credit Card (**** 1234)',
+    subtotal: 36.96,
+    deliveryFee: 2.99,
+    tip: 5.00,
+    total: 44.95,
+  };
+
+  // Simulate order progress updates
+  useEffect(() => {
+    if (progress < 1) {
+      const timer = setTimeout(() => {
+        // Gradually increase progress
+        if (progress < 0.4) {
+          setProgress(0.4); // Preparing
+        } else if (progress < 0.7) {
+          setProgress(0.7); // On the way
+        } else if (progress < 1) {
+          setProgress(1); // Delivered
+        }
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [progress]);
+
+  const getOrderStatus = () => {
+    if (progress < 0.25) {
+      return 'Order Confirmed';
+    }
+    if (progress < 0.5) {
+      return 'Preparing';
+    }
+    if (progress < 1) {
+      return 'On the Way';
+    }
+    return 'Delivered';
+  };
+
+  const getOrderDescription = () => {
+    if (progress < 0.25) {
+      return 'Your order has been received and confirmed.';
+    }
+    if (progress < 0.5) {
+      return 'The restaurant is preparing your food.';
+    }
+    if (progress < 1) {
+      return `Your food is on the way with ${order.delivery.driverName}.`;
+    }
+    return 'Your order has been delivered. Enjoy!';
+  };
+
+  const getOrderIcon = () => {
+    if (progress < 0.25) {
+      return 'checkmark-circle';
+    }
+    if (progress < 0.5) {
+      return 'restaurant';
+    }
+    if (progress < 1) {
+      return 'bicycle';
+    }
+    return 'home';
+  };
+
+  const calculateSubtotal = () => {
+    return order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Order Status</Text>
+      </View>
+
+      <ScrollView style={styles.scrollView}>
+        {/* Status Card */}
+        <View style={styles.statusCard}>
+          <View style={styles.statusHeader}>
+            <Text style={styles.orderNumber}>Order #{order.id}</Text>
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>{getOrderStatus()}</Text>
+            </View>
+          </View>
+
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+            </View>
+            <View style={styles.progressSteps}>
+              <View
+                style={[styles.progressStep, progress >= 0 ? styles.activeStep : {}]}>
+                <Ionicons name="checkmark-circle" size={22} color={progress >= 0 ? '#FF4500' : '#DDD'} />
+                <Text style={[styles.stepText, progress >= 0 ? styles.activeStepText : {}]}>
+                  Confirmed
+                </Text>
+              </View>
+              <View
+                style={[styles.progressStep, progress >= 0.3 ? styles.activeStep : {}]}>
+                <Ionicons name="restaurant" size={22} color={progress >= 0.3 ? '#FF4500' : '#DDD'} />
+                <Text style={[styles.stepText, progress >= 0.3 ? styles.activeStepText : {}]}>
+                  Preparing
+                </Text>
+              </View>
+              <View
+                style={[styles.progressStep, progress >= 0.6 ? styles.activeStep : {}]}>
+                <Ionicons name="bicycle" size={22} color={progress >= 0.6 ? '#FF4500' : '#DDD'} />
+                <Text style={[styles.stepText, progress >= 0.6 ? styles.activeStepText : {}]}>
+                  On the Way
+                </Text>
+              </View>
+              <View
+                style={[styles.progressStep, progress >= 1 ? styles.activeStep : {}]}>
+                <Ionicons name="home" size={22} color={progress >= 1 ? '#FF4500' : '#DDD'} />
+                <Text style={[styles.stepText, progress >= 1 ? styles.activeStepText : {}]}>
+                  Delivered
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.statusInfo}>
+            <Ionicons name={getOrderIcon()} size={32} color="#FF4500" />
+            <View style={styles.statusTextContainer}>
+              <Text style={styles.statusTitle}>{getOrderStatus()}</Text>
+              <Text style={styles.statusDescription}>{getOrderDescription()}</Text>
+            </View>
+          </View>
+
+          <View style={styles.estimatedTime}>
+            <Text style={styles.estimatedTimeLabel}>Estimated Delivery</Text>
+            <Text style={styles.estimatedTimeValue}>{order.estimatedDelivery}</Text>
+          </View>
+        </View>
+
+        {/* Delivery Info */}
+        {progress >= 0.6 && progress < 1 && (
+          <View style={styles.deliveryCard}>
+            <Text style={styles.sectionTitle}>Delivery Details</Text>
+            <View style={styles.driverInfo}>
+              <Image source={{ uri: order.delivery.driverPhoto }} style={styles.driverPhoto} />
+              <View style={styles.driverDetails}>
+                <Text style={styles.driverName}>{order.delivery.driverName}</Text>
+                <Text style={styles.driverRole}>Your Delivery Driver</Text>
+              </View>
+              <TouchableOpacity style={styles.callButton}>
+                <Ionicons name="call" size={20} color="#FF4500" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Restaurant Info */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Restaurant</Text>
+          <View style={styles.restaurantInfo}>
+            <Image source={{ uri: order.restaurant.image }} style={styles.restaurantImage} />
+            <View style={styles.restaurantDetails}>
+              <Text style={styles.restaurantName}>{order.restaurant.name}</Text>
+              <TouchableOpacity style={styles.callRestaurantButton}>
+                <Ionicons name="call-outline" size={14} color="#666" />
+                <Text style={styles.callRestaurantText}>Call Restaurant</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Delivery Address */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Delivery Address</Text>
+          <View style={styles.addressContainer}>
+            <Ionicons name="location" size={22} color="#FF4500" />
+            <Text style={styles.addressText}>{order.delivery.address}</Text>
+          </View>
+        </View>
+
+        {/* Order Summary */}
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Order Summary</Text>
+          {order.items.map((item, index) => (
+            <View key={index} style={styles.orderItem}>
+              <View style={styles.orderItemDetails}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemQuantity}>x{item.quantity}</Text>
+              </View>
+              <Text style={styles.itemTotal}>${(item.price * item.quantity).toFixed(2)}</Text>
+            </View>
+          ))}
+
+          <View style={styles.divider} />
+
+          <View style={styles.orderTotals}>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Subtotal</Text>
+              <Text style={styles.totalValue}>${calculateSubtotal().toFixed(2)}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Delivery Fee</Text>
+              <Text style={styles.totalValue}>${order.deliveryFee.toFixed(2)}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Driver Tip</Text>
+              <Text style={styles.totalValue}>${order.tip.toFixed(2)}</Text>
+            </View>
+            <View style={[styles.totalRow, styles.grandTotal]}>
+              <Text style={styles.grandTotalLabel}>Total</Text>
+              <Text style={styles.grandTotalValue}>${order.total.toFixed(2)}</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f8f8f8' },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff' },
+  backButton: { paddingRight: 16 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', flex: 1 },
+  scrollView: { padding: 16 },
+  statusCard: { backgroundColor: '#fff', padding: 16, borderRadius: 8, marginBottom: 16 },
+  statusHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  orderNumber: { fontSize: 16, fontWeight: 'bold' },
+  statusBadge: { paddingVertical: 4, paddingHorizontal: 8, backgroundColor: '#FF4500', borderRadius: 4 },
+  statusText: { color: '#fff' },
+  progressContainer: { marginTop: 16 },
+  progressBar: { height: 8, backgroundColor: '#ddd', borderRadius: 4 },
+  progressFill: { height: '100%', backgroundColor: '#FF4500', borderRadius: 4 },
+  progressSteps: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  progressStep: { alignItems: 'center' },
+  activeStep: { color: '#FF4500' },
+  stepText: { fontSize: 12, marginTop: 4 },
+  activeStepText: { color: '#FF4500' },
+  statusInfo: { flexDirection: 'row', marginTop: 16 },
+  statusIcon: { marginRight: 16 },
+  statusTextContainer: { flex: 1 },
+  statusTitle: { fontSize: 18, fontWeight: 'bold' },
+  statusDescription: { fontSize: 14, color: '#666' },
+  estimatedTime: { marginTop: 16 },
+  estimatedTimeLabel: { fontSize: 14, color: '#666' },
+  estimatedTimeValue: { fontSize: 16, fontWeight: 'bold' },
+  deliveryCard: { backgroundColor: '#fff', padding: 16, borderRadius: 8, marginBottom: 16 },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold' },
+  driverInfo: { flexDirection: 'row', marginTop: 16 },
+  driverPhoto: { width: 40, height: 40, borderRadius: 20 },
+  driverDetails: { marginLeft: 16, flex: 1 },
+  driverName: { fontWeight: 'bold' },
+  driverRole: { fontSize: 14, color: '#666' },
+  callButton: { paddingLeft: 16 },
+  restaurantInfo: { flexDirection: 'row', marginTop: 16 },
+  restaurantImage: { width: 40, height: 40, borderRadius: 4 },
+  restaurantDetails: { marginLeft: 16, flex: 1 },
+  restaurantName: { fontWeight: 'bold' },
+  callRestaurantButton: { flexDirection: 'row', alignItems: 'center' },
+  callRestaurantText: { fontSize: 14, color: '#666', marginLeft: 4 },
+  addressContainer: { flexDirection: 'row', marginTop: 16 },
+  addressText: { fontSize: 14, marginLeft: 8 },
+  orderItem: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  orderItemDetails: { flexDirection: 'row' },
+  itemName: { fontSize: 14 },
+  itemQuantity: { fontSize: 14, color: '#666', marginLeft: 4 },
+  itemTotal: { fontSize: 14 },
+  divider: { marginVertical: 8, borderBottomWidth: 1, borderBottomColor: '#ddd' },
+  orderTotals: { marginTop: 16 },
+  totalRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  totalLabel: { fontSize: 14, color: '#666' },
+  totalValue: { fontSize: 14, fontWeight: 'bold' },
+  grandTotal: { marginTop: 8, borderTopWidth: 1, borderTopColor: '#ddd', paddingTop: 8 },
+  grandTotalLabel: { fontSize: 16, fontWeight: 'bold' },
+  grandTotalValue: { fontSize: 16, fontWeight: 'bold' },
+});
+
+export default OrderStatusScreen;

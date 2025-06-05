@@ -1,0 +1,80 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+// Screens
+import HomeScreen from './screens/HomeScreen';
+import CategoryItemsScreen from './screens/CategoryItemsScreen';
+import FoodDetailScreen from './screens/FoodDetailScreen';
+import CartScreen from './screens/CartScreen';
+import CheckoutScreen from './screens/CheckoutScreen';
+import OrderStatusScreen from './screens/OrderStatusScreen';
+import OrderHistoryScreen from './screens/OrderHistoryScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import SearchScreen from './screens/SearchScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const getTabBarIcon = (route) => ({ focused, color, size }) => {
+  let iconName;
+  if (route.name === 'Home') {
+    iconName = focused ? 'home' : 'home-outline';
+  } else if (route.name === 'Search') {
+    iconName = focused ? 'search' : 'search-outline';
+  } else if (route.name === 'Profile') {
+    iconName = focused ? 'person' : 'person-outline';
+  }
+
+  return <Icon name={iconName} size={size} color={color} />;
+};
+
+// Home Stack Navigator
+function HomeStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HomeMain" component={HomeScreen} />
+      <Stack.Screen name="CategoryItems" component={CategoryItemsScreen} />
+      <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
+      <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
+      <Stack.Screen name="OrderStatus" component={OrderStatusScreen} />
+      <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Profile Stack Navigator
+function ProfileStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Main App Component
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarActiveTintColor: '#FF6347',
+          tabBarInactiveTintColor: 'gray',
+          tabBarIcon: getTabBarIcon(route),  
+        })}
+      >
+        <Tab.Screen name="Home" component={HomeStack} />
+        <Tab.Screen name="Search" component={SearchScreen} />
+        <Tab.Screen name="Profile" component={ProfileStack} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}

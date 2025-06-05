@@ -1,0 +1,204 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  ActivityIndicator,
+  TextInput,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+// Sample Data
+const foodItemsByCategory = {
+  'Pizza': [
+    { id: '1', name: 'Pepperoni Pizza', price: 12.99, image: 'https://images.pexels.com/photos/31688981/pexels-photo-31688981/free-photo-of-rustic-homemade-tomato-and-cheese-pizza.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.8, restaurant: 'Pizza Palace' },
+    { id: '2', name: 'Margherita Pizza', price: 10.99, image: 'https://images.pexels.com/photos/10068752/pexels-photo-10068752.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.5, restaurant: 'Pizza Palace' },
+    { id: '3', name: 'Vegetarian Pizza', price: 11.99, image: 'https://images.pexels.com/photos/18431672/pexels-photo-18431672/free-photo-of-pizza-margherita-cut-in-four.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.3, restaurant: 'Green Bites' },
+  ],
+  'Burgers': [
+    { id: '4', name: 'Classic Cheeseburger', price: 8.99, image: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.6, restaurant: 'Burger Joint' },
+    { id: '5', name: 'Bacon Burger', price: 10.99, image: 'https://images.pexels.com/photos/19345991/pexels-photo-19345991/free-photo-of-delicious-beef-burger.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.7, restaurant: 'Burger Joint' },
+    { id: '6', name: 'Veggie Burger', price: 9.99, image: 'https://images.pexels.com/photos/1431305/pexels-photo-1431305.jpeg?auto=compress&cs=tinysrgb&w=800', rating: 4.2, restaurant: 'Green Bites' },
+  ],
+};
+
+const CategoryItemsScreen = ({ route, navigation }) => {
+  const { category } = route.params;
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const [foodItems, setFoodItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const items = foodItemsByCategory[category] || [];
+      setFoodItems(items);
+      setFilteredItems(items);
+      setIsLoading(false);
+    }, 1000);
+  }, [category]);
+
+  useEffect(() => {
+    if (searchText.trim() === '') {
+      setFilteredItems(foodItems);
+    } else {
+      const lowerCaseQuery = searchText.toLowerCase();
+      const filtered = foodItems.filter(item =>
+        item.name.toLowerCase().includes(lowerCaseQuery) ||
+        item.restaurant.toLowerCase().includes(lowerCaseQuery)
+      );
+      setFilteredItems(filtered);
+    }
+  }, [searchText, foodItems]);
+
+  const renderFoodItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.foodCard}
+      onPress={() => navigation.navigate('FoodDetail', { foodId: item.id })}
+    >
+      <Image source={{ uri: item.image }} style={styles.foodImage} />
+      <View style={styles.foodInfo}>
+        <Text style={styles.foodName}>{item.name}</Text>
+        <Text style={styles.restaurantName}>{item.restaurant}</Text>
+        <View style={styles.foodMeta}>
+          <Text style={styles.foodPrice}>${item.price.toFixed(2)}</Text>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={16} color="#FFD700" />
+            <Text style={styles.ratingText}>{item.rating}</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{category}</Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#888" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search food..."
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+      </View>
+
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF4500" />
+          <Text style={styles.loadingText}>Loading {category}...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredItems}
+          renderItem={renderFoodItem}
+          keyExtractor={item => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#FFF',
+    elevation: 4,
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 10,
+    margin: 15,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  listContainer: {
+    paddingHorizontal: 15,
+    paddingBottom: 20,
+  },
+  foodCard: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    margin: 8,
+    elevation: 3,
+  },
+  foodImage: {
+    width: '100%',
+    height: 120,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  foodInfo: {
+    padding: 10,
+  },
+  foodName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  restaurantName: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 2,
+  },
+  foodMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  foodPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FF4500',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    marginLeft: 4,
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+});
+
+export default CategoryItemsScreen;

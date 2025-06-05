@@ -1,0 +1,88 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet } from 'react-native';
+
+const foodData = [
+  { id: '1', name: 'Chicken Biryani', price: 450, description: 'Spicy and flavorful' },
+  { id: '2', name: 'Beef Burger', price: 300, description: 'Juicy patty with cheese' },
+  { id: '3', name: 'Zinger Roll', price: 200, description: 'Crispy chicken wrap' },
+  { id: '4', name: 'Pizza Large', price: 1000, description: 'Loaded with cheese and toppings' },
+];
+
+const SearchScreen = () => {
+  const [query, setQuery] = useState('');
+
+  // Filter only when something is typed
+  const filteredFoods = query.trim()
+    ? foodData.filter(item =>
+        item.name.toLowerCase().includes(query.toLowerCase())
+      )
+    : foodData;
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.heading}>Search Your Food</Text>
+
+      <TextInput
+        style={styles.searchInput}
+        placeholder="e.g. biryani, burger..."
+        placeholderTextColor="#999"
+        value={query}
+        onChangeText={setQuery}
+      />
+
+      {filteredFoods.length === 0 ? (
+        <Text style={styles.noResult}>No matching food found.</Text>
+      ) : (
+        <FlatList
+          data={filteredFoods}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.itemBox}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.description}>{item.description}</Text>
+              <Text style={styles.price}>Rs. {item.price}</Text>
+            </View>
+          )}
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  heading: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+    textAlign: 'center',
+  },
+  searchInput: {
+    height: 45,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    fontSize: 16,
+    color: '#333',
+  },
+  itemBox: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  name: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  description: { fontSize: 14, color: '#666' },
+  price: { marginTop: 5, fontSize: 16, color: '#FF6347', fontWeight: 'bold' },
+  noResult: {
+    textAlign: 'center',
+    marginTop: 30,
+    color: '#888',
+    fontSize: 16,
+  },
+});
+
+export default SearchScreen;
